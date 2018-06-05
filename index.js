@@ -50,7 +50,13 @@ function getUserLookupTable(callback, event) {
         console.error(err);
         throw(err);
       } else {
-        userLookupTable = JSON.stringify(contents);
+        // the `contents` arg in this callback is a buffer containing the file contents.
+        // convert the buffer to a string and parse into an object.
+        // we expect the file contents to be reasonably sized so this is safe.
+        const theString = contents.toString('utf8')
+        const theData = JSON.parse(theString);
+        // console.log("found user lookups: " + JSON.stringify(theData));
+        userLookupTable = theData;
         return callback(event);  
       }
     })
