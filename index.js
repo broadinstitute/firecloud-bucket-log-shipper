@@ -45,12 +45,15 @@ function getUserLookupTable(callback, event) {
   storage
     .bucket("secret-storage")
     .file("userLookups.json")
-    .createReadStream().then( (stream) => {
-      stream.json().then( obj => {
-        userLookupTable = obj;
-        return callback(event);
-      });
-    });
+    .download(function(err, contents) {
+      if (err != null) {
+        console.error(err);
+        throw(err);
+      } else {
+        userLookupTable = JSON.stringify(contents);
+        return callback(event);  
+      }
+    })
 }
 
 function shipLog(event) {
