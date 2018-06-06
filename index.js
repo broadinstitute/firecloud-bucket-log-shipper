@@ -6,6 +6,7 @@ const request = require('request-promise-native');
 // to downloading the whole file for reading)
 const storage = new gcs();
 let logitApiKey = null;
+let userLookupTable = null;
 
 // this generates lots of http requests to logit. Make sure we use a persistent connection
 // so we don't create a new http connection each time.
@@ -39,6 +40,28 @@ function getApiKey(callback, event) {
     });
 }
 
+function getUserLookupTable(callback, event) {
+  // console.log("user lookup table read in progress");
+  storage
+    .bucket("secret-storage")
+    .file("userLookups.json")
+    .download(function(err, contents) {
+      if (err != null) {
+        console.error(err);
+        throw(err);
+      } else {
+        // the `contents` arg in this callback is a buffer containing the file contents.
+        // convert the buffer to a string and parse into an object.
+        // we expect the file contents to be reasonably sized so this is safe.
+        const theString = contents.toString('utf8')
+        const theData = JSON.parse(theString);
+        // console.log("found user lookups: " + JSON.stringify(theData));
+        userLookupTable = theData;
+        return callback(event);  
+      }
+    })
+}
+
 function shipLog(event) {
   // a final safety check on the api key - possible we attempted to retrieve it but got nothing in return
   if (logitApiKey) {
@@ -61,6 +84,21 @@ function shipLog(event) {
         }
       }
 
+      // if subjectid is still unknown, attempt to look it up in the user table.
+      // lazy-load the user table if it isn't already in memory.
+      let manualLookup = false;
+      if (subjectId === "unknown") {
+        if (userLookupTable === null) {
+          return getUserLookupTable(shipLog, event);
+        } else {
+          // console.log("using cached user lookup table");
+          if (userLookupTable.hasOwnProperty(principalEmail)) {
+            manualLookup = true;
+            subjectId = userLookupTable[principalEmail];
+          }
+        }
+      }
+
       const payload = {
         timestamp: timestamp,
         principalEmail: principalEmail,
@@ -68,7 +106,8 @@ function shipLog(event) {
         // and we pay by log volume ... so omit them.
         // methodName: methodName,
         // resource: resource,
-        subjectId: subjectId
+        subjectId: subjectId,
+        manualLookup: manualLookup
       };
 
       const options = {

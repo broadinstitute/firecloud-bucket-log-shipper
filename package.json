@@ -1,7 +1,8 @@
 {
   "dependencies": {
-    "@google-cloud/storage": "^1.6.0",
-    "request": "^2.85.0",
+    "@google-cloud/storage": "^1.7.0",
+    "fast-crc32c": "^1.0.4",
+    "request": "^2.87.0",
     "request-promise-native": "^1.0.5"
   }
 }
