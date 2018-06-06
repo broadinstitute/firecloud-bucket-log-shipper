@@ -25,7 +25,7 @@ function getApiKey(callback, event) {
   // console.log("api key lookup in progress");
   storage
     .bucket("secret-storage")
-    .file("dev-logit.json")
+    .file("logit.json")
     .getMetadata()
     .then(results => {
       const metadata = results[0];
@@ -41,7 +41,7 @@ function getApiKey(callback, event) {
 }
 
 function getUserLookupTable(callback, event) {
-  console.log("user lookup table read in progress");
+  // console.log("user lookup table read in progress");
   storage
     .bucket("secret-storage")
     .file("userLookups.json")
@@ -91,6 +91,7 @@ function shipLog(event) {
         if (userLookupTable === null) {
           return getUserLookupTable(shipLog, event);
         } else {
+          // console.log("using cached user lookup table");
           if (userLookupTable.hasOwnProperty(principalEmail)) {
             manualLookup = true;
             subjectId = userLookupTable[principalEmail];
