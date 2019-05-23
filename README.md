@@ -1,6 +1,12 @@
 # firecloud-bucket-log-shipper
 > A quick Cloud Function to send bucket audit logs from Google to Logit.
 
+---
+
+:warning: `**this Cloud Function is not in use. It is not deployed anywhere,  nor is the code actively maintained.**`
+
+---
+
 * [Objective](#objective)
 * [High Level Architecture](#high-level-architecture)
 * [Handling the API Key](#handling-the-api-key)
